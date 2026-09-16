@@ -46,5 +46,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Commit & Push Kubernetes Changes') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-push',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        git config user.name "Jenkins"
+                        git config user.email "jenkins@localhost"
+
+                        git add k8s/backend.yaml k8s/frontend.yaml
+
+                        git commit -m "Update Kubernetes images to build ${BUILD_ID}" || true
+
+                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Jeffrin2005/CI-CD.git HEAD:main
+                    '''
+                }
+            }
+        }
     }
 }
