@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: learn_mern-backend:latest # UPDATE THIS BEFORE DEMO
-        imagePullPolicy: IfNotPresent
+        image: jeffrinjojo/backend:latest # UPDATE THIS BEFORE DEMO
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         env:
