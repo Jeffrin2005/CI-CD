@@ -38,11 +38,12 @@ pipeline {
                 script {
                     echo "Updating Kubernetes image tags..."
 
-                    sh "sed -i 's|image: jeffrinjojo/backend:.*|image: jeffrinjojo/backend:${env.BUILD_ID}|' k8s/backend.yaml"
+                    sh "sed -i 's|image: jeffrinjojo/backend:.*|image: jeffrinjojo/backend:${env.BUILD_ID}|' k8s/backend-deploy.yaml"
 
-                    sh "sed -i 's|image: jeffrinjojo/frontend:.*|image: jeffrinjojo/frontend:${env.BUILD_ID}|' k8s/frontend.yaml"
+                    sh "sed -i 's|image: jeffrinjojo/frontend:.*|image: jeffrinjojo/frontend:${env.BUILD_ID}|' k8s/frontend-deploy.yaml"
 
-                    sh "git diff"
+                    echo "Updated Kubernetes manifests:"
+                    sh "git diff -- k8s/backend-deploy.yaml k8s/frontend-deploy.yaml"
                 }
             }
         }
@@ -60,7 +61,7 @@ pipeline {
                         git config user.name "Jenkins"
                         git config user.email "jenkins@localhost"
 
-                        git add k8s/backend.yaml k8s/frontend.yaml
+                        git add k8s/backend-deploy.yaml k8s/frontend-deploy.yaml
 
                         git commit -m "Update Kubernetes images to build ${BUILD_ID}" || true
 
