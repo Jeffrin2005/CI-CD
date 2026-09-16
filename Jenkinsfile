@@ -32,5 +32,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Update Kubernetes Manifests') {
+            steps {
+                script {
+                    echo "Updating Kubernetes image tags..."
+
+                    sh "sed -i 's|image: jeffrinjojo/backend:.*|image: jeffrinjojo/backend:${env.BUILD_ID}|' k8s/backend.yaml"
+
+                    sh "sed -i 's|image: jeffrinjojo/frontend:.*|image: jeffrinjojo/frontend:${env.BUILD_ID}|' k8s/frontend.yaml"
+
+                    sh "git diff"
+                }
+            }
+        }
     }
 }
