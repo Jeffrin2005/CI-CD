@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mern-frontend
+  template:
+    metadata:
+      labels:
+        app: mern-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: learn_mern-frontend:latest  # UPDATE THIS BEFORE DEMO
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5173
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: mern-frontend
+  ports:
+  - port: 5173
+    targetPort: 5173

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mern-backend
+  template:
+    metadata:
+      labels:
+        app: mern-backend
+    spec:
+      containers:
+      - name: backend
+        image: learn_mern-backend:latest # UPDATE THIS BEFORE DEMO
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: MONGO_URI
+          value: "mongodb+srv://jeffrinjojo1_db_user:X0XsOtG1Bn7CEIYX@cluster0.ruiyfwt.mongodb.net/?appName=Cluster0" # Atlas URI goes here!
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc
+spec:
+  selector:
+    app: mern-backend
+  ports:
+  - port: 5000
+    targetPort: 5000
