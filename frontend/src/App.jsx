@@ -8,6 +8,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Page 1: Landing / Home */}
+
         <Route path="/" element={<LandingPage />} />
 
         {/* Page 2: Login & Register */}
