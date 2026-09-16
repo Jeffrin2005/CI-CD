@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: jeffrinjojo/frontend:latest  # UPDATE THIS BEFORE DEMO
+        image: jeffrinjojo/frontend:6
         imagePullPolicy: Always
         ports:
         - containerPort: 5173
