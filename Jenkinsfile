@@ -13,8 +13,6 @@ pipeline {
                     echo "Building backend..."
 
                     sh "docker build -t jeffrinjojo/backend:${env.BUILD_ID} ./backend"
-
-
                     sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
 
                     sh "docker push jeffrinjojo/backend:${env.BUILD_ID}"
