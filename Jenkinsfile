@@ -9,6 +9,7 @@ pipeline {
         stage('Build & Push Backend') {
             steps {
                 script {
+                    
                     echo "Building backend..."
 
                     sh "docker build -t jeffrinjojo/backend:${env.BUILD_ID} ./backend"
