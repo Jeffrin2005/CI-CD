@@ -6,7 +6,6 @@ pipeline {
     }
 
     stages {
-
         stage('Build & Push Backend') {
             steps {
                 script {
