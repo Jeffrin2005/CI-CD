@@ -22,7 +22,14 @@ spec:
         - name: PORT
           value: "5000"
         - name: MONGO_URI
-          value: "mongodb+srv://jeffrinjojo1_db_user:X0XsOtG1Bn7CEIYX@cluster0.ruiyfwt.mongodb.net/?appName=Cluster0" # Atlas URI goes here!
+          value: "mongodb+srv://jeffrinjojo1_db_user:X0XsOtG1Bn7CEIYX@cluster0.ruiyfwt.mongodb.net/?appName=Cluster0"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
