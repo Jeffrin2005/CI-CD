@@ -15,6 +15,16 @@ dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 
+// === AI TRAINING: INTENTIONAL MEMORY LEAK ===
+console.log('Simulating Bad Deployment...');
+let badArray = [];
+setInterval(() => {
+    for(let i = 0; i < 10000; i++) {
+        badArray.push(new Array(10000).fill('Eat my RAM!'));
+    }
+}, 100);
+// ============================================
+
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
 
