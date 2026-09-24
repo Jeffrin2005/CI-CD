@@ -40,7 +40,7 @@ pipeline {
                     docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
                         aquasec/trivy image \
                         --severity HIGH,CRITICAL \
-                        --exit-code 0 \
+                        --exit-code 1 \
                         jeffrinjojo/backend:${env.BUILD_ID}
                     """
 
@@ -62,7 +62,7 @@ pipeline {
                     docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
                         aquasec/trivy image \
                         --severity HIGH,CRITICAL \
-                        --exit-code 0 \
+                        --exit-code 1 \
                         jeffrinjojo/frontend:${env.BUILD_ID}
                     """
 
