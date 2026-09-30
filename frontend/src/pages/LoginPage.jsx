@@ -105,7 +105,7 @@ function LoginPage() {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                            {isLogin ? "Welcome Back (Testing ArgoCD!)" : "Create Account"}
+                            {isLogin ? "Testing ArgoCD using GitHub Actions" : "Create Account"}
                         </h1>
                         <p className="text-gray-400 mt-2 text-sm">
                             {isLogin
