@@ -9,89 +9,45 @@ permissions:
   contents: write
 
 jobs:
-  build-backend:
-    name: Build Backend
+  build-push-backend:
+    name: Build & Push Backend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
           
-      - name: Build Backend Image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Build and Push Backend Image
         run: |
           docker build -t jeffrinjojo/backend:${{ github.run_number }} ./backend
-          docker save jeffrinjojo/backend:${{ github.run_number }} > backend.tar
-          
-      - name: Upload Backend Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-image
-          path: backend.tar
-          retention-days: 1
-
-  push-backend:
-    name: Push Backend
-    needs: [build-backend]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Backend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-image
-          
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
-      - name: Load and Push Backend Image
-        run: |
-          docker load < backend.tar
           docker push jeffrinjojo/backend:${{ github.run_number }}
 
-  build-frontend:
-    name: Build Frontend
+  build-push-frontend:
+    name: Build & Push Frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
           
-      - name: Build Frontend Image
-        run: |
-          docker build -t jeffrinjojo/frontend:${{ github.run_number }} ./frontend
-          docker save jeffrinjojo/frontend:${{ github.run_number }} > frontend.tar
-          
-      - name: Upload Frontend Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-image
-          path: frontend.tar
-          retention-days: 1
-
-  push-frontend:
-    name: Push Frontend
-    needs: [build-frontend]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-image
-          
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Load and Push Frontend Image
+      - name: Build and Push Frontend Image
         run: |
-          docker load < frontend.tar
+          docker build -t jeffrinjojo/frontend:${{ github.run_number }} ./frontend
           docker push jeffrinjojo/frontend:${{ github.run_number }}
 
   update-manifests:
     name: Update K8s Manifests
-    needs: [push-backend, push-frontend]
+    needs: [build-push-backend, build-push-frontend]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
