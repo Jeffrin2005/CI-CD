@@ -28,6 +28,27 @@ jobs:
           path: backend.tar
           retention-days: 1
 
+  push-backend:
+    name: Push Backend
+    needs: [build-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Backend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-image
+          
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Load and Push Backend Image
+        run: |
+          docker load < backend.tar
+          docker push jeffrinjojo/backend:${{ github.run_number }}
+
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
@@ -47,16 +68,11 @@ jobs:
           path: frontend.tar
           retention-days: 1
 
-  push-images:
-    name: Push to DockerHub
-    needs: [build-backend, build-frontend]
+  push-frontend:
+    name: Push Frontend
+    needs: [build-frontend]
     runs-on: ubuntu-latest
     steps:
-      - name: Download Backend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-image
-          
       - name: Download Frontend Artifact
         uses: actions/download-artifact@v4
         with:
@@ -68,17 +84,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Load and Push Images
+      - name: Load and Push Frontend Image
         run: |
-          docker load < backend.tar
-          docker push jeffrinjojo/backend:${{ github.run_number }}
-          
           docker load < frontend.tar
           docker push jeffrinjojo/frontend:${{ github.run_number }}
 
   update-manifests:
     name: Update K8s Manifests
-    needs: [push-images]
+    needs: [push-backend, push-frontend]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
