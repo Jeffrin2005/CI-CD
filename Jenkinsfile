@@ -13,12 +13,17 @@ pipeline {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     script {
                         echo "Starting SonarQube Code Analysis..."
-                        // We run the official SonarScanner Docker image to scan the codebase
-                        // 'host.docker.internal' is used to reach SonarQube running on the host's Docker network
+                        // Since Jenkins is running in Docker, we can't easily volume-mount the workspace to another container
+                        // So we download and run the SonarScanner natively in the Jenkins workspace!
                         sh """
-                        docker run --rm --network host \
-                            -v \$(pwd):/usr/src \
-                            sonarsource/sonar-scanner-cli \
+                        if [ ! -d "sonar-scanner" ]; then
+                            echo "Downloading SonarScanner..."
+                            curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+                            unzip -qo sonar-scanner.zip
+                            mv sonar-scanner-5.0.1.3006-linux sonar-scanner
+                        fi
+                        
+                        ./sonar-scanner/bin/sonar-scanner \
                             -Dsonar.projectKey=mern-app \
                             -Dsonar.sources=./frontend/src,./backend \
                             -Dsonar.host.url=http://host.docker.internal:9000 \
