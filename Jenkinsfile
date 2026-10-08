@@ -87,7 +87,8 @@ pipeline {
                         git add k8s/backend-deploy.yaml k8s/frontend-deploy.yaml
 
                         git commit -m "Update Kubernetes images to build ${BUILD_ID}" || true
-
+                        
+                        git pull --rebase https://${GIT_USER}:${GIT_TOKEN}@github.com/Jeffrin2005/CI-CD.git main
                         git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Jeffrin2005/CI-CD.git HEAD:main
                     '''
                 }
