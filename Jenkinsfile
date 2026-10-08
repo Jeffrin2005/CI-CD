@@ -40,7 +40,7 @@ pipeline {
                     echo "Downloading Trivy Scanner..."
                     sh """
                     if [ ! -f "trivy" ]; then
-                        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b . v0.49.1
+                        wget -qO- https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.tar.gz | tar xz
                     fi
                     """
                     
