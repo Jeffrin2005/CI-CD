@@ -40,7 +40,7 @@ pipeline {
                     echo "Downloading Trivy Scanner..."
                     sh """
                     if [ ! -f "trivy" ]; then
-                        curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.48.3/trivy_0.48.3_Linux-64bit.tar.gz | tar xz
+                        curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz | tar xz
                     fi
                     """
                     
