@@ -30,7 +30,7 @@ function LandingPage() {
       {/* Foreground Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
         <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 drop-shadow-2xl">
-          Zero Waste. <span className="text-amber-400">Premium Taste.</span>
+          Zero Waste for devops. <span className="text-amber-400">Premium Taste.</span>
         </h1>
         <p className="text-lg md:text-2xl text-gray-200 mb-10 font-light max-w-2xl">
           Experience world-class culinary surplus from the finest hotels and restaurants, curated just for you.
