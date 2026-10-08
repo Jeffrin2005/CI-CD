@@ -57,21 +57,7 @@ pipeline {
             }
         }
 
-        stage('Update Kubernetes Manifests') {
-            steps {
-                script {
-                    echo "Updating Kubernetes image tags..."
-
-                    sh "sed -i 's|image: jeffrinjojo/backend:.*|image: jeffrinjojo/backend:${env.BUILD_ID}|' k8s/backend-deploy.yaml"
-                    sh "sed -i 's|image: jeffrinjojo/frontend:.*|image: jeffrinjojo/frontend:${env.BUILD_ID}|' k8s/frontend-deploy.yaml"
-
-                    echo "Updated Kubernetes manifests:"
-                    sh "git diff -- k8s/backend-deploy.yaml k8s/frontend-deploy.yaml"
-                }
-            }
-        }
-
-        stage('Commit & Push Kubernetes Changes') {
+        stage('Update and Push Kubernetes Manifests') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -81,15 +67,26 @@ pipeline {
                     )
                 ]) {
                     sh '''
+                        # Abort any stuck rebases
+                        git rebase --abort || true
+                        
+                        # Configure Git
                         git config user.name "Jenkins"
                         git config user.email "jenkins@localhost"
 
-                        git add k8s/backend-deploy.yaml k8s/frontend-deploy.yaml
+                        # Fetch the absolute latest changes from GitHub and reset to them
+                        # This guarantees zero conflicts!
+                        git fetch https://${GIT_USER}:${GIT_TOKEN}@github.com/Jeffrin2005/CI-CD.git main
+                        git reset --hard FETCH_HEAD
+                        git clean -fd
 
+                        echo "Updating Kubernetes image tags..."
+                        sed -i "s|image: jeffrinjojo/backend:.*|image: jeffrinjojo/backend:${BUILD_ID}|" k8s/backend-deploy.yaml
+                        sed -i "s|image: jeffrinjojo/frontend:.*|image: jeffrinjojo/frontend:${BUILD_ID}|" k8s/frontend-deploy.yaml
+
+                        echo "Committing and Pushing to GitHub..."
+                        git add k8s/backend-deploy.yaml k8s/frontend-deploy.yaml
                         git commit -m "Update Kubernetes images to build ${BUILD_ID}" || true
-                        
-                        git rebase --abort || true
-                        git pull --rebase https://${GIT_USER}:${GIT_TOKEN}@github.com/Jeffrin2005/CI-CD.git main
                         git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Jeffrin2005/CI-CD.git HEAD:main
                     '''
                 }
