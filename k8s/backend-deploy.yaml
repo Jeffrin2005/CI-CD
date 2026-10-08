@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: jeffrinjojo/backend:11
+        image: jeffrinjojo/backend:37
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
