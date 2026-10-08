@@ -10,20 +10,21 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    echo "Starting SonarQube Code Analysis..."
-                    // We run the official SonarScanner Docker image to scan the codebase
-                    // 'host.docker.internal' is used to reach SonarQube running on the host's Docker network
-                    sh """
-                    docker run --rm --network host \
-                        -v \$(pwd):/usr/src \
-                        sonarsource/sonar-scanner-cli \
-                        -Dsonar.projectKey=mern-app \
-                        -Dsonar.sources=./frontend/src,./backend \
-                        -Dsonar.host.url=http://host.docker.internal:9000 \
-                        -Dsonar.login=admin \
-                        -Dsonar.password=admin
-                    """
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    script {
+                        echo "Starting SonarQube Code Analysis..."
+                        // We run the official SonarScanner Docker image to scan the codebase
+                        // 'host.docker.internal' is used to reach SonarQube running on the host's Docker network
+                        sh """
+                        docker run --rm --network host \
+                            -v \$(pwd):/usr/src \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.projectKey=mern-app \
+                            -Dsonar.sources=./frontend/src,./backend \
+                            -Dsonar.host.url=http://host.docker.internal:9000 \
+                            -Dsonar.login=\${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
