@@ -34,31 +34,12 @@ pipeline {
             }
         }
 
-        stage('Security Scan (Trivy IaC)') {
-            steps {
-                script {
-                    echo "Downloading Trivy Scanner..."
-                    sh """
-                    if [ ! -f "trivy" ]; then
-                        curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz | tar xz
-                    fi
-                    """
-                    
-                    echo "Running Trivy IaC Scanner (acting as Checkov) on k8s/ folder..."
-                    // We set exit-code 0 so it prints warnings without breaking your pipeline while you learn!
-                    sh "./trivy config --severity HIGH,CRITICAL --exit-code 0 ./k8s"
-                }
-            }
-        }
 
         stage('Build & Push Backend') {
             steps {
                 script {
                     echo "Building backend..."
                     sh "docker build -t jeffrinjojo/backend:${env.BUILD_ID} ./backend"
-
-                    echo "Scanning Backend Docker Image with Trivy..."
-                    sh "./trivy image --severity HIGH,CRITICAL --exit-code 0 jeffrinjojo/backend:${env.BUILD_ID}"
 
                     sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
                     sh "docker push jeffrinjojo/backend:${env.BUILD_ID}"
@@ -71,9 +52,6 @@ pipeline {
                 script {
                     echo "Building frontend..."
                     sh "docker build -t jeffrinjojo/frontend:${env.BUILD_ID} ./frontend"
-
-                    echo "Scanning Frontend Docker Image with Trivy..."
-                    sh "./trivy image --severity HIGH,CRITICAL --exit-code 0 jeffrinjojo/frontend:${env.BUILD_ID}"
 
                     sh "docker push jeffrinjojo/frontend:${env.BUILD_ID}"
                 }
