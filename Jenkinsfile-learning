@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo 'Code downloaded from GitHub'
+            }
+        }
+
+        stage('Inspect Repository') {
+            steps {
+                sh 'pwd'
+                sh 'ls -la'
+                sh 'ls -la frontend backend'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'GitHub checkout successful!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
