@@ -1,29 +1,35 @@
+
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS-22'
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Install Frontend Dependencies') {
             steps {
-                checkout scm
-                echo 'Code downloaded from GitHub'
+                dir('frontend') {
+                    sh 'npm ci'
+                }
             }
         }
 
-        stage('Inspect Repository') {
+        stage('Build Frontend') {
             steps {
-                sh 'pwd'
-                sh 'ls -la'
-                sh 'ls -la frontend backend'
+                dir('frontend') {
+                    sh 'npm run build'
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'GitHub checkout successful!'
+            echo 'Frontend build successful!'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo 'Frontend build failed!'
         }
     }
 }
