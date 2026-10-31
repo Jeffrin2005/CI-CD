@@ -22,6 +22,13 @@ pipeline {
                 }
             }
         }
+        stage('Lint Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run lint'
+                }
+            }
+        }
     }
 
     post {
