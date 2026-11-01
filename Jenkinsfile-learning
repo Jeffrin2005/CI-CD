@@ -23,28 +23,29 @@ pipeline {
             }
         }
 
-        stage('Trivy Filesystem Scan') {
-    steps {
-        sh '''
-            trivy fs \
-            --scanners vuln,secret,misconfig \
-            --format json \
-            -o trivy-report.json .
-        '''
-    }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
 
-    post {
-        always {
-            archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=CI-CD \
+                            -Dsonar.sources=frontend/src \
+                            -Dsonar.exclusions=frontend/node_modules/**,frontend/dist/**
+                        """
+                    }
+                }
+            }
         }
-    }
-}
 
         stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     script {
                         def qg = waitForQualityGate()
+
                         if (qg.status != 'OK') {
                             error "Pipeline stopped: Quality Gate status is ${qg.status}"
                         }
@@ -52,24 +53,31 @@ pipeline {
                 }
             }
         }
-stage('Trivy Filesystem Scan') {
-    steps {
-        sh '''
-            trivy fs \
-            --scanners vuln,secret,misconfig \
-            --format template \
-            --template "@contrib/html.tpl" \
-            -o trivy-report.html .
-        '''
-    }
-}
-    
+
+        stage('Trivy Filesystem Scan') {
+            steps {
+                sh '''
+                    trivy fs \
+                    --scanners vuln,secret,misconfig \
+                    --format json \
+                    -o trivy-report.json .
+                '''
+            }
+
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-report.json',
+                                     allowEmptyArchive: true
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Frontend build and Quality Gate successful!'
+            echo 'Frontend build, SonarQube Quality Gate and Trivy scan completed successfully!'
         }
+
         failure {
             echo 'Pipeline failed!'
         }
