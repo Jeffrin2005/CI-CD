@@ -71,15 +71,56 @@ pipeline {
                 }
             }
         }
+
+        // Build frontend and backend Docker images
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                    docker build \
+                        -t jeffrinjojo/frontend:${BUILD_NUMBER} \
+                        -t jeffrinjojo/frontend:latest ./frontend
+
+                    docker build \
+                        -t jeffrinjojo/backend:${BUILD_NUMBER} \
+                        -t jeffrinjojo/backend:latest ./backend
+                '''
+            }
+        }
+
+        // Push images to Docker Hub
+        stage('Push Docker Images') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKERHUB_TOKEN" | docker login \
+                            -u "$DOCKERHUB_USERNAME" --password-stdin
+
+                        docker push jeffrinjojo/frontend:${BUILD_NUMBER}
+                        docker push jeffrinjojo/frontend:latest
+
+                        docker push jeffrinjojo/backend:${BUILD_NUMBER}
+                        docker push jeffrinjojo/backend:latest
+
+                        docker logout
+                    '''
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Frontend build, SonarQube Quality Gate and Trivy scan completed successfully!'
+            echo 'Frontend build, SonarQube, Trivy and Docker image push completed successfully!'
         }
 
         failure {
-            echo 'Pipeline failed!'
+            echo 'Pipeline failed! Check the console output.'
         }
     }
 }
