@@ -52,6 +52,12 @@ pipeline {
                 }
             }
         }
+stage('Trivy Filesystem Scan') {
+    steps {
+        sh 'trivy fs --scanners vuln,secret,misconfig .'
+    }
+}
+    
     }
 
     post {
