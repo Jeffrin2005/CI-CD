@@ -6,7 +6,6 @@ pipeline {
         nodejs 'NodeJS-22'
     }
 
-
     stages {
         stage('Install Frontend Dependencies') {
             steps {
@@ -23,43 +22,44 @@ pipeline {
                 }
             }
         }
-        stage('SonarQube Analysis') {
-    steps {
-        script {
-            def scannerHome = tool 'SonarScanner'
 
-            withSonarQubeEnv('SonarQube') {
-                sh """
-                    ${scannerHome}/bin/sonar-scanner \
-                    -Dsonar.projectKey=CI-CD \
-                    -Dsonar.sources=frontend/src \
-                    -Dsonar.exclusions=frontend/node_modules/**,frontend/dist/**
-                """
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=CI-CD \
+                            -Dsonar.sources=frontend/src \
+                            -Dsonar.exclusions=frontend/node_modules/**,frontend/dist/**
+                        """
+                    }
+                }
             }
         }
-    }
-stage('Quality Gate') {
-    steps {
-        timeout(time: 5, unit: 'MINUTES') {
-            script {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Pipeline stopped: Quality Gate status is ${qg.status}"
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline stopped: Quality Gate status is ${qg.status}"
+                        }
+                    }
                 }
             }
         }
     }
-}
-}
-
-    }
 
     post {
         success {
-            echo 'Frontend build successful!'
+            echo 'Frontend build and Quality Gate successful!'
         }
         failure {
-            echo 'Frontend build failed!'
+            echo 'Pipeline failed!'
         }
     }
 }
