@@ -23,22 +23,22 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
+        stage('Trivy Filesystem Scan') {
+    steps {
+        sh '''
+            trivy fs \
+            --scanners vuln,secret,misconfig \
+            --format json \
+            -o trivy-report.json .
+        '''
+    }
 
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=CI-CD \
-                            -Dsonar.sources=frontend/src \
-                            -Dsonar.exclusions=frontend/node_modules/**,frontend/dist/**
-                        """
-                    }
-                }
-            }
+    post {
+        always {
+            archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
         }
+    }
+}
 
         stage('Quality Gate') {
             steps {
