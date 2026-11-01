@@ -23,6 +23,22 @@ pipeline {
                 }
             }
         }
+        stage('SonarQube Analysis') {
+    steps {
+        script {
+            def scannerHome = tool 'SonarScanner'
+
+            withSonarQubeEnv('SonarQube') {
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=CI-CD \
+                    -Dsonar.sources=frontend/src \
+                    -Dsonar.exclusions=frontend/node_modules/**,frontend/dist/**
+                """
+            }
+        }
+    }
+}
 
     }
 
