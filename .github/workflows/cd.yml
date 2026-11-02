@@ -16,9 +16,11 @@ permissions:
 jobs:
   update-manifests:
     name: Update Kubernetes Image Tags
+
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
+
     runs-on: ubuntu-latest
 
     steps:
@@ -30,8 +32,23 @@ jobs:
 
       - name: Set Image Tag
         id: image
+        env:
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
         run: |
-          echo "tag=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          echo "tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Deployment Configuration
+        env:
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          FRONTEND_IMAGE: ${{ vars.FRONTEND_IMAGE }}
+          BACKEND_IMAGE: ${{ vars.BACKEND_IMAGE }}
+        run: |
+          set -euo pipefail
+
+          : "${DOCKERHUB_USERNAME:?Missing DOCKERHUB_USERNAME repository variable}"
+          : "${FRONTEND_IMAGE:?Missing FRONTEND_IMAGE repository variable}"
+          : "${BACKEND_IMAGE:?Missing BACKEND_IMAGE repository variable}"
 
       - name: Update Frontend Deployment
         env:
@@ -39,11 +56,15 @@ jobs:
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
           FRONTEND_IMAGE: ${{ vars.FRONTEND_IMAGE }}
         run: |
+          set -euo pipefail
+
           IMAGE="${DOCKERHUB_USERNAME}/${FRONTEND_IMAGE}:${IMAGE_TAG}"
 
           sed -i -E \
             "s#(image:[[:space:]]*).*#\1${IMAGE}#" \
             k8s/frontend-deploy.yaml
+
+          echo "Frontend image updated to: ${IMAGE}"
 
       - name: Update Backend Deployment
         env:
@@ -51,14 +72,19 @@ jobs:
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
           BACKEND_IMAGE: ${{ vars.BACKEND_IMAGE }}
         run: |
+          set -euo pipefail
+
           IMAGE="${DOCKERHUB_USERNAME}/${BACKEND_IMAGE}:${IMAGE_TAG}"
 
           sed -i -E \
             "s#(image:[[:space:]]*).*#\1${IMAGE}#" \
             k8s/backend-deploy.yaml
 
+          echo "Backend image updated to: ${IMAGE}"
+
       - name: Validate Manifest Changes
         run: |
+          set -euo pipefail
           git diff --check
           git diff -- k8s/
 
@@ -66,6 +92,8 @@ jobs:
         env:
           IMAGE_TAG: ${{ steps.image.outputs.tag }}
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
