@@ -12,12 +12,14 @@ on:
 
 jobs:
   frontend-build:
-    name: Build Frontend
+    name: Frontend Build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,12 +32,16 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Run Frontend Tests
+        working-directory: frontend
+        run: npm test --if-present
+
       - name: Build Frontend
         working-directory: frontend
         run: npm run build
 
   backend-build:
-    name: Build Backend
+    name: Backend Build
     runs-on: ubuntu-latest
 
     steps:
@@ -53,6 +59,35 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Run Backend Tests
+        working-directory: backend
+        run: npm test --if-present
+
       - name: Check Backend Syntax
         working-directory: backend
         run: node --check server.js
+
+  sonarcloud-analysis:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=YOUR_PROJECT_KEY
+            -Dsonar.organization=YOUR_ORGANIZATION
