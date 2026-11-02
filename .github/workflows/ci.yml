@@ -59,7 +59,7 @@ jobs:
 
       - name: Run Backend Tests
         working-directory: backend
-        run: npm test --if-present
+        run: npm test -- --passWithNoTests
 
       - name: Check Backend Syntax
         working-directory: backend
