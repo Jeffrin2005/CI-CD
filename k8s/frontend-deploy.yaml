@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: jeffrinjojo/frontend:73eb43bc6b8356577a1814a1b0717ddb2a2fb66a
+          image: jeffrinjojo/frontend:bb21aca86316e12afc97e8ea7d7abf9b7f8093b5
           imagePullPolicy: Always
           ports:
             - containerPort: 5173
