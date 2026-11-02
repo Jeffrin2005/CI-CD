@@ -1,0 +1,22 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  first-job:
+    name: First GitHub Actions Job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Display welcome message
+        run: echo "GitHub Actions is working!"
