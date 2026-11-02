@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,23 +14,26 @@ spec:
         app: mern-backend
     spec:
       containers:
-      - name: backend
-        image: jeffrinjojo/backend:3517a1913d18ff97298f55867b4285f02b49e7ae
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 5000
-        env:
-        - name: PORT
-          value: "5000"
-        - name: MONGO_URI
-          value: "mongodb+srv://jeffrinjojo1_db_user:X0XsOtG1Bn7CEIYX@cluster0.ruiyfwt.mongodb.net/?appName=Cluster0"
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "256Mi"
+        - name: backend
+          image: jeffrinjojo/backend:3517a1913d18ff97298f55867b4285f02b49e7ae
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              value: "5000"
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: mongo-uri
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -39,5 +43,5 @@ spec:
   selector:
     app: mern-backend
   ports:
-  - port: 5000
-    targetPort: 5000
+    - port: 5000
+      targetPort: 5000
